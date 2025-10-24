@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอปทำนายเลขเด็ด อาจารย์แม็ก</title>
+    <!-- โหลด Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลดฟอนต์ Inter --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ใช้ฟอนต์ Sarabun สำหรับภาษาไทย และ Inter สำหรับภาษาอังกฤษ */
+        body {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+        h1, h2, h3, button {
+            font-family: 'Sarabun', 'Inter', sans-serif;
+        }
+
+        /* Keyframe for pop-in animation */
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Apply pop-in animation to number balls */
+        .number-ball {
+            animation: popIn 0.3s ease-out forwards; /* 0.3s duration, ease-out timing, keeps final state */
+            opacity: 0; /* Start hidden */
+            /* Add this if you want to ensure it handles potential re-runs without issues, though forwards should handle it */
+            /* animation-fill-mode: both; */
+        }
+
+        /* Custom image styling for the avatar (*** ลบส่วนนี้ทิ้ง ***) */
+        /*
+        .avatar {
+            width: 80px; 
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover; 
+            border: 4px solid #a78bfa; 
+            box-shadow: 0 0 15px rgba(167, 139, 250, 0.7); 
+        }
+        */
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center p-4 py-8">
+
+    <!-- การ์ดหลักของแอป --><div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-2xl w-full text-center">
+        
+        <!-- ไอคอน - (*** เปลี่ยนกลับเป็นลูกแก้ว ***) -->
+        <div class="text-6xl mb-4">
+            🔮
+        </div>
+        
+        <!-- หัวข้อ --><h1 class="text-3xl font-bold text-gray-800 mb-2">ทำนายเลขเด็ด อาจารย์แม็ก</h1>
+        <p class="text-gray-600 mb-6">กดปุ่มเพื่อสุ่มตัวเลขนำโชค
+            <br>
+            ขอให้คุณโชคดี!
+        </p>
+
+        <!-- พื้นที่แสดงตัวเลข --><div id="prediction-sections" class="space-y-6">
+
+            <!-- ส่วนเลขท้าย 2 ตัว --><div>
+                <h2 class="text-2xl font-bold text-indigo-700 mb-4">เลขท้าย 2 ตัว</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">แนวทางเลขบน</h3>
+                        <div id="numbers-container-2top" class="flex flex-wrap justify-center gap-3 sm:gap-4 min-h-[5rem]">
+                            <!-- เลข 2 ตัว บน --></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">แนวทางเลขล่าง</h3>
+                        <div id="numbers-container-2bottom" class="flex flex-wrap justify-center gap-3 sm:gap-4 min-h-[5rem]">
+                            <!-- เลข 2 ตัว ล่าง --></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-200">
+
+            <!-- ส่วนเลข 3 ตัว --><div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">เลข 3 ตัว</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">แนวทางเลขหน้า</h3>
+                        <div id="numbers-container-3first" class="flex flex-wrap justify-center gap-3 sm:gap-4 min-h-[5rem]">
+                            <!-- เลข 3 ตัว หน้า --></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-600 mb-2">แนวทางเลขท้าย</h3>
+                        <div id="numbers-container-3last" class="flex flex-wrap justify-center gap-3 sm:gap-4 min-h-[5rem]">
+                            <!-- เลข 3 ตัว ท้าย --></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ปุ่มสุ่มตัวเลข --><button id="predict-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full text-lg transition duration-300 transform hover:scale-105 shadow-lg mt-8">
+            ✨ ทำนายเลขเด็ด!
+        </button>
+
+        <!-- ข้อความให้โชค --><p id="fortune-message" class="text-gray-500 mt-6 italic text-sm"></p>
+
+        <!-- หมายเหตุ --><p class="text-xs text-gray-400 mt-8">
+            *แอปนี้สร้างขึ้นเพื่อความบันเทิงเท่านั้น โปรดใช้วิจารณญาณในการเสี่ยงโชค
+        </p>
+    </div>
+
+    <script>
+        // ดึง element ที่จำเป็น
+        const predictButton = document.getElementById('predict-button');
+        const fortuneMessage = document.getElementById('fortune-message');
+        
+        // ดึง containers สำหรับตัวเลข
+        const container2Top = document.getElementById('numbers-container-2top');
+        const container2Bottom = document.getElementById('numbers-container-2bottom');
+        const container3First = document.getElementById('numbers-container-3first');
+        const container3Last = document.getElementById('numbers-container-3last');
+
+
+        // ข้อความให้โชค (สุ่ม)
+        const fortunes = [
+            "ขอให้โชคดี เฮงๆ รวยๆ!",
+            "งวดนี้อาจเป็นของคุณ!",
+            "ดวงกำลังมา!",
+            "ซื้อมากซื้อน้อย ก็ขอให้ถูก!",
+            "เศรษฐีคนต่อไปอาจเป็นคุณ!"
+        ];
+
+        // เพิ่ม Event Listener ให้กับปุ่ม
+        predictButton.addEventListener('click', generateNumbers);
+
+        // (*** เพิ่มฟังก์ชันนี้ ***)
+        // Helper function: ดึงวันที่ปัจจุบันเป็น String (YYYY-MM-DD)
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // เดือนเริ่มที่ 0
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Helper function: สร้างตัวเลขสุ่ม
+        function generateUniqueNumbers(count, max, pad) {
+            const numbers = new Set();
+            while (numbers.size < count) {
+                const randomNumber = Math.floor(Math.random() * (max + 1)); // (max + 1) เพื่อให้รวม max ด้วย
+                const formattedNumber = String(randomNumber).padStart(pad, '0');
+                numbers.add(formattedNumber);
+            }
+            return Array.from(numbers).sort();
+        }
+
+        // Helper function: แสดงผลตัวเลข (*** เราจะลบฟังก์ชันนี้ทิ้ง ***)
+        /*
+        function displayNumbers(containerElement, numbersArray, baseClasses) {
+            containerElement.innerHTML = ''; // ล้าง container
+            numbersArray.forEach((number, index) => {
+                const numberBall = document.createElement('div');
+                numberBall.className = 'number-ball ' + baseClasses;
+                numberBall.style.animationDelay = `${(index + 1) * 0.1}s`; // กำหนด delay ที่นี่
+                numberBall.textContent = number;
+                containerElement.appendChild(numberBall);
+            });
+        }
+        */
+
+        // (*** ปรับปรุงฟังก์ชันนี้ให้เป็น async ***)
+        async function generateNumbers() {
+            // (*** เพิ่มการตรวจสอบและบันทึกวันที่ ***)
+            const today = getTodayDateString();
+            const lastClick = localStorage.getItem('lastClickDate');
+
+            // ตรวจสอบอีกครั้ง (แม้ว่าปุ่มควรจะถูกปิดไปแล้ว)
+            if (lastClick === today && !predictButton.textContent.includes('กำลังคำนวณ')) {
+                return;
+            }
+            
+            // บันทึกวันที่กด *ทันที*
+            localStorage.setItem('lastClickDate', today);
+
+            // ปิดการใช้งานปุ่มชั่วคราว
+            predictButton.disabled = true;
+            predictButton.textContent = 'กำลังคำนวณ...';
+            predictButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // ล้างตัวเลขเก่า
+            container2Top.innerHTML = '';
+            container2Bottom.innerHTML = '';
+            container3First.innerHTML = '';
+            container3Last.innerHTML = '';
+            fortuneMessage.textContent = '';
+            
+            // 1. สร้างเลขท้าย 2 ตัว (บน 3, ล่าง 3)
+            const numbers2Top = generateUniqueNumbers(3, 99, 2);
+            const numbers2Bottom = generateUniqueNumbers(3, 99, 2);
+            
+            // 2. สร้างเลข 3 ตัว (หน้า 2, หลัง 2)
+            const numbers3First = generateUniqueNumbers(2, 999, 3);
+            const numbers3Last = generateUniqueNumbers(2, 999, 3);
+
+            // กำหนด class สำหรับลูกบอล
+            // w-16 h-16 sm:w-20 sm:h-20
+            const ballClass2Digit = 'flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl font-bold bg-yellow-400 text-yellow-900 rounded-full shadow-lg';
+            // w-24 h-16 sm:w-28 sm:h-20 (กว้างขึ้นสำหรับ 3 ตัว)
+            const ballClass3Digit = 'flex items-center justify-center w-24 h-16 sm:w-28 sm:h-20 text-2xl sm:text-3xl font-bold bg-cyan-400 text-cyan-900 rounded-full shadow-lg';
+
+
+            // (*** ลบ setTimeout(500) wrapper เก่าทิ้ง ***)
+            
+            // (*** ตรรกะใหม่: สร้างคิวรวม และแสดงผลทีละตัว ***)
+            
+            // สร้างคิวรวมของตัวเลขทั้งหมด
+            const revealQueue = [
+                // (Section 1: 2 Top)
+                ...numbers2Top.map(num => ({ number: num, container: container2Top, className: ballClass2Digit })),
+                // (Section 2: 2 Bottom)
+                ...numbers2Bottom.map(num => ({ number: num, container: container2Bottom, className: ballClass2Digit })),
+                // (Section 3: 3 First)
+                ...numbers3First.map(num => ({ number: num, container: container3First, className: ballClass3Digit })),
+                // (Section 4: 3 Last)
+                ...numbers3Last.map(num => ({ number: num, container: container3Last, className: ballClass3Digit }))
+            ];
+
+            // ตั้งค่าดีเลย์ (1500ms = 1.5 วินาที)
+            const suspenseDelay = 1500; 
+
+            // วนลูปเพื่อแสดงผลทีละตัว
+            for (const item of revealQueue) {
+                const numberBall = document.createElement('div');
+                // 'number-ball' class มี animation: popIn
+                numberBall.className = 'number-ball ' + item.className; 
+                numberBall.textContent = item.number;
+                
+                item.container.appendChild(numberBall);
+
+                // รอ (await) ตามเวลาที่กำหนด
+                await new Promise(resolve => setTimeout(resolve, suspenseDelay));
+            }
+
+
+            // (*** โค้ดที่เหลือจะทำงานหลังจากแสดงผลครบ ***)
+
+            // สุ่มข้อความให้โชค
+            const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+                fortuneMessage.textContent = randomFortune;
+
+            // (*** อัปเดตสถานะปุ่มหลังจากทำนายเสร็จ ***)
+            // (ลบโค้ดเก่า)
+            // predictButton.disabled = false;
+            // predictButton.textContent = '✨ ทำนายอีกครั้ง!';
+            // predictButton.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            // (โค้ดใหม่: ตั้งค่าสถานะ "ทำนายแล้ว")
+            predictButton.textContent = '🔮 วันนี้ทำนายแล้ว 🔮';
+            predictButton.classList.add('bg-gray-500', 'hover:bg-gray-500');
+            predictButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+            // ปุ่มยังคงสถานะ disabled = true
+
+            // (*** ลบวงเล็บปิดของ setTimeout เก่า ***)
+            // }, 500); 
+        }
+
+        // สุ่มครั้งแรกเมื่อโหลดหน้า
+        document.addEventListener('DOMContentLoaded', () => {
+             // ใส่ placeholder เริ่มต้น
+             const placeholder2 = '<div class="flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl font-bold bg-gray-200 text-gray-400 rounded-full shadow-inner italic">...</div>';
+             const placeholder3 = '<div class="flex items-center justify-center w-24 h-16 sm:w-28 sm:h-20 text-2xl sm:text-3xl font-bold bg-gray-200 text-gray-400 rounded-full shadow-inner italic">...</div>';
+             
+             container2Top.innerHTML = placeholder2;
+             container2Bottom.innerHTML = placeholder2;
+             container3First.innerHTML = placeholder3;
+             container3Last.innerHTML = placeholder3;
+
+             // (*** เพิ่มโค้ดตรวจสอบตอนโหลดหน้า ***)
+             const today = getTodayDateString();
+             const lastClick = localStorage.getItem('lastClickDate');
+
+             if (lastClick === today) {
+                // ถ้าวันนี้กดไปแล้ว
+                predictButton.disabled = true;
+                predictButton.textContent = '🔮 วันนี้ทำนายแล้ว 🔮';
+                predictButton.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-500', 'hover:bg-gray-500');
+                predictButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+                fortuneMessage.textContent = 'คุณได้ใช้สิทธิ์ทำนายของวันนี้แล้ว กลับมาใหม่วันพรุ่งนี้นะครับ!';
+             }
+        });
+
+    </script>
+
+</body>
+</html>
+
+
